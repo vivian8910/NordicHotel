@@ -1,3 +1,7 @@
 .App {
-	text-align: center;
+  text-align: center;
+}
+
+.react-select__indicators {
+  display: none;
 }

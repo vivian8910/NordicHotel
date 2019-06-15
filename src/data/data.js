@@ -1,4 +1,4 @@
-export const hotels = {
+export default {
   hotels: [
     {
       name: "Quality Hotel Høje Taastrup",
