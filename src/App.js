@@ -1,11 +1,64 @@
 import React, { useState } from "react";
-import "./App.css";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
+
 import HotelContainer from "./components/hotelContainer.js";
 import SearchBar from "./components/searchBar.js";
 import HotelDetails from "./components/hotelDetails.js";
-import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import hotels from "./data/data.js";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import "./App.css";
+
+const App = () => {
+  const [hotelsData, setHotelsData] = useState(hotels.hotels);
+
+  return (
+    <Router>
+      <MuiThemeProvider theme={theme}>
+        <div className="App">
+          <SearchBar hotelsData={hotelsData} />
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={props => (
+                <HotelContainer {...props} hotelsData={hotelsData} />
+              )}
+            />
+            <Route
+              path="/location/:city"
+              render={props => (
+                <HotelContainer {...props} hotelsData={hotelsData} />
+              )}
+            />
+            <Route
+              path="/hotels/:name"
+              render={props => (
+                <HotelContainer {...props} hotelsData={hotelsData} />
+              )}
+            />
+            <Route
+              path="/hoteldetails/:hotel"
+              render={props => (
+                <HotelDetails
+                  {...props}
+                  hotelsData={hotelsData}
+                  setHotelsData={setHotelsData}
+                />
+              )}
+            />
+            <Route
+              path="/favoritelist"
+              render={props => (
+                <HotelContainer {...props} hotelsData={hotelsData} />
+              )}
+            />
+            <Route render={() => <p>Not Found</p>} />
+          </Switch>
+        </div>
+      </MuiThemeProvider>
+    </Router>
+  );
+};
 
 const theme = createMuiTheme({
   palette: {
@@ -29,73 +82,5 @@ const theme = createMuiTheme({
     ].join(",")
   }
 });
-
-// make a state so that can pass a callback to change from child
-// const hotelsData = hotels.hotels;
-
-const App = () => {
-  const [hotelsData, setHotelsData] = useState(hotels.hotels)
-  const [wishlist, setWishlist] = useState([])
-
-  const addFavoriteProperty = (value) => {
-    setHotelsData(value)
-  }
-
-  const addHotelToWishlist = (value) => {
-    setWishlist([...wishlist, value])
-  }
-
-  const removeHotelFromWishlist = (value) => {
-    setWishlist(wishlist.filter(item => item !== value))
-  }
-
-  console.log(wishlist)
-
-  return (
-    <Router>
-      <MuiThemeProvider theme={theme}>
-        <div className="App">
-          <SearchBar hotelsData={hotelsData} />
-          <Switch>
-            <Route
-              exact
-              path="/"
-              render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
-              )}
-            />
-            <Route
-              path="/location/:city"
-              render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
-              )}
-            />
-            <Route
-              path="/hotels"
-              render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
-              )}
-            />
-            <Route
-              path="/hoteldetails"
-              render={props => (
-                <HotelDetails {...props} hotelsData={hotelsData} 
-                addFavoriteProperty={addFavoriteProperty}
-                addHotelToWishlist={addHotelToWishlist}
-                removeHotelFromWishlist={removeHotelFromWishlist}
-                wishlist={wishlist}
-                />
-              )}
-            />
-            <Route path="/favoritelist" render={props=>(
-              <HotelContainer {...props}  hotelsData={hotelsData} wishlist={wishlist}/>
-            )}/>
-            <Route render={() => <p>Not Found</p>} />
-          </Switch>
-        </div>
-      </MuiThemeProvider>
-    </Router>
-  );
-};
 
 export default App;

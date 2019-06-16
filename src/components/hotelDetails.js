@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -9,9 +7,114 @@ import Collapse from "@material-ui/core/Collapse";
 import Avatar from "@material-ui/core/Avatar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import { red } from "@material-ui/core/colors";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { red } from "@material-ui/core/colors";
+import { makeStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
+import PropTypes from "prop-types";
+
+const HotelDetails = ({ hotelsData, setHotelsData, match }) => {
+  const classes = useStyles();
+
+  const hotelName = match.params.hotel.split("-").join(" ");
+  const selectedHotel = hotelsData.filter(
+    hotel => hotel.name.trim() === hotelName.trim()
+  )[0];
+  // might be problematic using index 
+  // using this coz there is no unqiue identifier for the hotel
+  const hotelIndex = hotelsData.indexOf(selectedHotel);
+
+  const [expanded, setExpanded] = useState(false);
+  const handleExpandClick = () => {
+    setExpanded(prevExpanded => !prevExpanded);
+  };
+
+  const toggleFavorite = () => {
+    setHotelsData(prevHotels => {
+      const hotelsCopy = [...prevHotels];
+      hotelsCopy[hotelIndex].isFavorite = !hotelsCopy[hotelIndex].isFavorite;
+      return hotelsCopy;
+    });
+  };
+
+  // add this to avoid wrong hotel name provided 
+  if (hotelIndex < 0) {
+    return <p>Not Found</p>;
+  }
+
+  return (
+    <Card className={classes.card}>
+      <CardHeader
+        avatar={
+          <Avatar aria-label="Recipe" className={classes.avatar}>
+            Nordic Hotel
+          </Avatar>
+        }
+        action={
+          <IconButton aria-label="Add to favorites" onClick={toggleFavorite}>
+            <FavoriteIcon
+              className={selectedHotel.isFavorite ? classes.button : ""}
+            />
+          </IconButton>
+        }
+        title={hotelName}
+        subheader={
+          selectedHotel.address.city
+            ? selectedHotel.address.city
+            : selectedHotel.destinationName
+        }
+      />
+      <CardContent>
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          component="p"
+          style={{ marginBottom: 10 }}
+        >
+          Room capaity: {selectedHotel.roomCapacity}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" component="p">
+          Brand name: {selectedHotel.brandName}
+        </Typography>
+      </CardContent>
+      <CardActions disableSpacing>
+        <IconButton
+          className={clsx(classes.expand, {
+            [classes.expandOpen]: expanded
+          })}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="Show more"
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </CardActions>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            component="p"
+            style={{ marginBottom: 10 }}
+          >
+            Contact details
+          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {selectedHotel.contactDetails.phoneNmuber
+              ? selectedHotel.contactDetails.phoneNmuber
+              : selectedHotel.manager.phoneNumber}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {selectedHotel.manager.emailAddress
+              ? selectedHotel.manager.emailAddress
+              : ""}
+          </Typography>
+        </CardContent>
+      </Collapse>
+    </Card>
+  );
+};
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -41,125 +144,9 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const HotelDetails = props => {
-  const classes = useStyles();
-
-  const { history, 
-          hotelsData, 
-          addFavoriteProperty, 
-          addHotelToWishlist, 
-          removeHotelFromWishlist, 
-          wishlist } 
-  = props;
-
-  const hotelName = history.location.pathname.split("/")[2].split('-').join(' ');
-  const favHotel = hotelsData.filter(hotel => hotel.name === hotelName);
-  const favHotelIndex = hotelsData.indexOf(favHotel[0])
-
-  const [expanded, setExpanded] = useState(false);
-
-  // const [fav, setFav] = useState(hotelsData[favHotelIndex].isFavorite);
-
-  const handleExpandClick = () => {
-    setExpanded(prevExpanded => !prevExpanded);
-  };
-
-  const handleClick = () => {
-    // setFav(prevFav => !prevFav);
-    // const hotelsDataCopy = hotelsData
-    // hotelsDataCopy[favHotelIndex].isFavorite = fav
-    // console.log('//////',hotelsDataCopy)
-
-    addFavoriteProperty(prevHotels => {
-      const hotelsCopy = [...prevHotels]
-      // hotelsCopy[favHotelIndex].isFavorite = true;
-      if (wishlist.includes(hotelsCopy[favHotelIndex])){
-        hotelsCopy[favHotelIndex].isFavorite = false
-      } else {
-        hotelsCopy[favHotelIndex].isFavorite = true;
-      }
-      return hotelsCopy
-    })
-    
-    if (hotelsData[favHotelIndex].isFavorite === true){
-      addHotelToWishlist(hotelsData[favHotelIndex])
-    } else {
-      removeHotelFromWishlist(hotelsData[favHotelIndex])
-    }
-    
-    
-  };
-
-  return(
-    <Card className={classes.card}>
-      <CardHeader
-        avatar={
-          <Avatar aria-label="Recipe" className={classes.avatar}>
-            Nordic Hotel
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="Add to favorites" onClick={handleClick}>
-            <FavoriteIcon
-              className={hotelsData[favHotelIndex].isFavorite ? classes.button : ""}
-            />
-          </IconButton>
-        }
-        title={hotelName}
-        subheader="September 14, 2016"
-      />
-      <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the
-          mussels, if you like.
-        </Typography>
-      </CardContent>
-      <CardActions disableSpacing>
-        <IconButton
-          className={clsx(classes.expand, {
-            [classes.expandOpen]: expanded
-          })}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="Show more"
-        >
-          <ExpandMoreIcon />
-        </IconButton>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography paragraph>Method:</Typography>
-          <Typography paragraph>
-            Heat 1/2 cup of the broth in a pot until simmering, add saffron and
-            set aside for 10 minutes.
-          </Typography>
-          <Typography paragraph>
-            Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet
-            over medium-high heat. Add chicken, shrimp and chorizo, and cook,
-            stirring occasionally until lightly browned, 6 to 8 minutes.
-            Transfer shrimp to a large plate and set aside, leaving chicken and
-            chorizo in the pan. Add pimentón, bay leaves, garlic, tomatoes,
-            onion, salt and pepper, and cook, stirring often until thickened and
-            fragrant, about 10 minutes. Add saffron broth and remaining 4 1/2
-            cups chicken broth; bring to a boil.
-          </Typography>
-          <Typography paragraph>
-            Add rice and stir very gently to distribute. Top with artichokes and
-            peppers, and cook without stirring, until most of the liquid is
-            absorbed, 15 to 18 minutes. Reduce heat to medium-low, add reserved
-            shrimp and mussels, tucking them down into the rice, and cook again
-            without stirring, until mussels have opened and rice is just tender,
-            5 to 7 minutes more. (Discard any mussels that don’t open.)
-          </Typography>
-          <Typography>
-            Set aside off of the heat to let rest for 10 minutes, and then
-            serve.
-          </Typography>
-        </CardContent>
-      </Collapse>
-    </Card>
-  );
+HotelDetails.propTypes = {
+  hotelsData: PropTypes.array.isRequired,
+  setHotelsData: PropTypes.func.isRequired
 };
 
 export default HotelDetails;

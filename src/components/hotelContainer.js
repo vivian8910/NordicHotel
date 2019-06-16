@@ -1,66 +1,58 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import HotelCard from "./hotelCard.js";
 import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
+import PropTypes from "prop-types";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: 20
-  },
-  card: {
-    padding: theme.spacing(2.5),
-    textAlign: "center",
-    color: theme.palette.text.secondary
-  }
-}));
+import HotelCard from "./hotelCard.js";
 
-const HotelContainer = props => {
+const HotelContainer = ({ hotelsData, match, history }) => {
   const classes = useStyles();
-  const { hotelsData, match, history, wishlist } = props;
 
-
-  const handleFilter = value => {
-    if (value === "All") {
+  // process data according to different routes
+  const extractHotelsForDisplay = () => {
+    if (history.location.pathname === "/") {
       return hotelsData;
-    } else {
-      return hotelsData.filter(hotel => hotel.address.city === value);
+    }
+    if (history.location.pathname === "/favoritelist") {
+      return hotelsData.filter(hotel => hotel.isFavorite === true);
+    }
+    if (history.location.pathname.includes("/location")) {
+      return filterHotelsByCity(match.params.city);
+    }
+    if (history.location.pathname.includes("/hotels")) {
+      return searchHotelByName(match.params.name.split("-").join(" "));
     }
   };
 
-  const handleSearch = value => {
-    return hotelsData.filter(hotel => hotel.name === value);
-  };
-
-  const handleFilterData = () => {
-    if (history.location.pathname === "/hotels") {
-      if (history.location.search) {
-        return handleSearch(history.location.search.split("=")[1].split('-').join(' '));
-      }
-    } else if (history.location.pathname === "/") {
+  const filterHotelsByCity = city => {
+    if (city === "All") {
       return hotelsData;
-    } else if (history.location.pathname === "/favoritelist") {
-      return wishlist
     } else {
-      return handleFilter(match.params.city);
+      return hotelsData.filter(hotel => hotel.address.city === city);
     }
-    return null
   };
 
-  const hotelDataFiltered = handleFilterData();
+  const searchHotelByName = name => {
+    return hotelsData.filter(hotel => hotel.name.trim() === name.trim());
+  };
 
-  if (hotelDataFiltered && hotelDataFiltered.length === 0) {
-    return (<p>No favorite hotels yet</p>)
-  } 
+  const hotelsForDisplay = extractHotelsForDisplay();
 
-  if (!hotelDataFiltered) {
-    return (<p>Not found</p>)
+  if (history.location.pathname === "/favoritelist") {
+    if (hotelsForDisplay.length === 0) {
+      return <p>No favorite hotels yet</p>;
+    }
   }
-  
+
+  // catch bad routes
+  if (!hotelsForDisplay || hotelsForDisplay.length === 0) {
+    return <p>Not found</p>;
+  }
+
   return (
     <div className={classes.root}>
       <Grid container spacing={3}>
-        {hotelDataFiltered.map((hotel, index) => {
+        {hotelsForDisplay.map((hotel, index) => {
           return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={index}>
               <HotelCard
@@ -74,6 +66,22 @@ const HotelContainer = props => {
       </Grid>
     </div>
   );
+};
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    flexGrow: 1,
+    padding: 20
+  },
+  card: {
+    padding: theme.spacing(2.5),
+    textAlign: "center",
+    color: theme.palette.text.secondary
+  }
+}));
+
+HotelContainer.propTypes = {
+  hotelsData: PropTypes.array.isRequired
 };
 
 export default HotelContainer;
