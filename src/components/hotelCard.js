@@ -80,7 +80,9 @@ const useStyles = makeStyles({
 
 HotelCard.propTypes = {
   brandName: PropTypes.string.isRequired,
-  hotelName: PropTypes.string.isRequired
+  hotelName: PropTypes.string.isRequired,
+  handleClick: PropTypes.func.isRequired,
+  favHotels: PropTypes.array.isRequired
 };
 
 export default HotelCard;

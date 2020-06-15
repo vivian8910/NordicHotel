@@ -134,7 +134,6 @@ const useStyles = makeStyles(theme => ({
 
 HotelDetails.propTypes = {
   hotelsData: PropTypes.array.isRequired,
-  setHotelsData: PropTypes.func.isRequired
 };
 
 export default HotelDetails;

@@ -20,10 +20,6 @@ const HotelContainer = ({ hotelsData, match, history }) => {
     setPage(value);
   };
 
-  useEffect(() => {
-    setPage(1)
-  }, [history.location.pathname]);
-
   // process data according to different routes
   const extractHotelsForDisplay = () => {
     if (history.location.pathname === "/") {
@@ -54,6 +50,16 @@ const HotelContainer = ({ hotelsData, match, history }) => {
 
   const hotelsForDisplay = extractHotelsForDisplay();
 
+  const paginationCount = (displayedHotels) => {
+    return displayedHotels % 12 === 0 ? Math.floor(displayedHotels / 12) : Math.floor(displayedHotels / 12) + 1; 
+  }
+
+  const count = paginationCount(hotelsForDisplay.length);
+
+  useEffect(() => {
+    setPage(1)
+  }, [history.location.pathname, count]);
+
   if (history.location.pathname === "/favoritelist") {
     if (hotelsForDisplay.length === 0) {
       return <p>No favorite hotels yet</p>;
@@ -65,9 +71,7 @@ const HotelContainer = ({ hotelsData, match, history }) => {
     return <p>Not found</p>;
   }
 
-  const paginationCount = (displayedHotels) => {
-    return displayedHotels % 12 === 0 ? Math.floor(displayedHotels / 12) : Math.floor(displayedHotels / 12) + 1; 
-  }
+  
 
   return (
     <div className={classes.root}>
@@ -88,7 +92,7 @@ const HotelContainer = ({ hotelsData, match, history }) => {
       </Grid>
       <Box className={classes.ul}>
         <Pagination 
-          count={paginationCount(hotelsForDisplay.length)}
+          count={count}
           page={page} 
           onChange={handleChange}
         />
