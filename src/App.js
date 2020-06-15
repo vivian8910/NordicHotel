@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
@@ -9,31 +9,38 @@ import hotels from "./data/data.js";
 import "./App.css";
 
 const App = () => {
-  const [hotelsData, setHotelsData] = useState(hotels.hotels);
-
   return (
     <Router>
       <MuiThemeProvider theme={theme}>
         <div className="App">
-          <SearchBar hotelsData={hotelsData} />
+          <SearchBar hotelsData={hotels.hotels} />
           <Switch>
             <Route
               exact
               path="/"
               render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
+                <HotelContainer 
+                  {...props} 
+                  hotelsData={hotels.hotels} 
+                />
               )}
             />
             <Route
               path="/location/:city"
               render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
+                <HotelContainer 
+                  {...props} 
+                  hotelsData={hotels.hotels} 
+                />
               )}
             />
             <Route
               path="/hotels/:name"
               render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
+                <HotelContainer 
+                  {...props} 
+                  hotelsData={hotels.hotels} 
+                />
               )}
             />
             <Route
@@ -41,15 +48,17 @@ const App = () => {
               render={props => (
                 <HotelDetails
                   {...props}
-                  hotelsData={hotelsData}
-                  setHotelsData={setHotelsData}
+                  hotelsData={hotels.hotels}
                 />
               )}
             />
             <Route
               path="/favoritelist"
               render={props => (
-                <HotelContainer {...props} hotelsData={hotelsData} />
+                <HotelContainer 
+                  {...props} 
+                  hotelsData={hotels.hotels} 
+                />
               )}
             />
             <Route render={() => <p>Not Found</p>} />

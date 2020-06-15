@@ -1,12 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
+import Pagination from '@material-ui/lab/Pagination';
+import Box from '@material-ui/core/Box';
 import PropTypes from "prop-types";
+import { useLocalStorage } from "../hooks/useLocalStorage"
+import { toggleFavorite } from "../helper";
 
 import HotelCard from "./hotelCard.js";
 
 const HotelContainer = ({ hotelsData, match, history }) => {
+  const [favHotels, setFavHotels] = useLocalStorage("favHotels", []);
+
   const classes = useStyles();
+
+  const [page, setPage] = useState(1);
+
+  const handleChange = (event, value) => {
+    setPage(value);
+  };
+
+  useEffect(() => {
+    setPage(1)
+  }, [history.location.pathname]);
 
   // process data according to different routes
   const extractHotelsForDisplay = () => {
@@ -14,7 +30,7 @@ const HotelContainer = ({ hotelsData, match, history }) => {
       return hotelsData;
     }
     if (history.location.pathname === "/favoritelist") {
-      return hotelsData.filter(hotel => hotel.isFavorite === true);
+      return favHotels || [];
     }
     if (history.location.pathname.includes("/location")) {
       return filterHotelsByCity(match.params.city);
@@ -41,7 +57,7 @@ const HotelContainer = ({ hotelsData, match, history }) => {
   if (history.location.pathname === "/favoritelist") {
     if (hotelsForDisplay.length === 0) {
       return <p>No favorite hotels yet</p>;
-    }
+    } 
   }
 
   // catch bad routes
@@ -49,21 +65,34 @@ const HotelContainer = ({ hotelsData, match, history }) => {
     return <p>Not found</p>;
   }
 
+  const paginationCount = (displayedHotels) => {
+    return displayedHotels % 12 === 0 ? Math.floor(displayedHotels / 12) : Math.floor(displayedHotels / 12) + 1; 
+  }
+
   return (
     <div className={classes.root}>
-      <Grid container spacing={3}>
-        {hotelsForDisplay.map((hotel, index) => {
+      <Grid container spacing={2}>
+        {hotelsForDisplay.slice((page - 1) * 12, page * 12).map((hotel, index) => {
           return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={index}>
               <HotelCard
                 className={classes.card}
                 brandName={hotel.brandName}
                 hotelName={hotel.name}
+                handleClick={() => toggleFavorite(favHotels, setFavHotels, hotel)}
+                favHotels={favHotels}
               />
             </Grid>
           );
         })}
       </Grid>
+      <Box className={classes.ul}>
+        <Pagination 
+          count={paginationCount(hotelsForDisplay.length)}
+          page={page} 
+          onChange={handleChange}
+        />
+      </Box>
     </div>
   );
 };
@@ -77,6 +106,11 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2.5),
     textAlign: "center",
     color: theme.palette.text.secondary
+  },
+  ul: {
+    display: "flex",
+    justifyContent: "center",
+    padding: "1rem"
   }
 }));
 

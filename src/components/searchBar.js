@@ -60,7 +60,12 @@ const SearchAppBar = ({ hotelsData }) => {
       <AppBar position="static">
         <Toolbar>
           <Typography className={classes.title} variant="h6" noWrap>
-            Nordic Hotel
+            <Link
+            to={{ pathname: "/" }}
+            style={{ textDecoration: "none", color: "white" }} 
+            >
+              Nordic Hotel
+            </Link>
           </Typography>
           <AutoComplete hotelsData={hotelsData} />
           <Link

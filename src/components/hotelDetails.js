@@ -11,37 +11,25 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { red } from "@material-ui/core/colors";
 import { makeStyles } from "@material-ui/core/styles";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { toggleFavorite } from "../helper";
 import clsx from "clsx";
 import PropTypes from "prop-types";
 
-const HotelDetails = ({ hotelsData, setHotelsData, match }) => {
+const HotelDetails = ({ hotelsData, match }) => {
   const classes = useStyles();
 
   const hotelName = match.params.hotel.split("-").join(" ");
   const selectedHotel = hotelsData.filter(
     hotel => hotel.name.trim() === hotelName.trim()
   )[0];
-  // might be problematic using index 
-  // using this coz there is no unqiue identifier for the hotel
-  const hotelIndex = hotelsData.indexOf(selectedHotel);
 
   const [expanded, setExpanded] = useState(false);
   const handleExpandClick = () => {
     setExpanded(prevExpanded => !prevExpanded);
   };
 
-  const toggleFavorite = () => {
-    setHotelsData(prevHotels => {
-      const hotelsCopy = [...prevHotels];
-      hotelsCopy[hotelIndex].isFavorite = !hotelsCopy[hotelIndex].isFavorite;
-      return hotelsCopy;
-    });
-  };
-
-  // add this to avoid wrong hotel name provided 
-  if (hotelIndex < 0) {
-    return <p>Not Found</p>;
-  }
+  const [favHotels, setFavHotels] = useLocalStorage("favHotels", []);
 
   return (
     <Card className={classes.card}>
@@ -52,9 +40,9 @@ const HotelDetails = ({ hotelsData, setHotelsData, match }) => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="Add to favorites" onClick={toggleFavorite}>
+          <IconButton aria-label="Add to favorites" onClick={() => toggleFavorite(favHotels, setFavHotels, selectedHotel)}>
             <FavoriteIcon
-              className={selectedHotel.isFavorite ? classes.button : ""}
+              className={favHotels?.some(hotel => hotel.name === selectedHotel.name) ? classes.button : ""}
             />
           </IconButton>
         }
@@ -118,8 +106,8 @@ const HotelDetails = ({ hotelsData, setHotelsData, match }) => {
 
 const useStyles = makeStyles(theme => ({
   card: {
-    maxWidth: 345,
-    margin: 20
+    maxWidth: "80%",
+    margin: "40px auto"
   },
   media: {
     height: 0,
